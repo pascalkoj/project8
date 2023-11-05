@@ -37,16 +37,19 @@ class MainActivity : AppCompatActivity() {
 
         val movieContainer = binding.movieInfoContainer
 
+        // send email when user clicks feedback button
         binding.bFeedback.setOnClickListener {
             sendFeedbackEmail()
         }
 
+        // when we hit search button
         searchButton.setOnClickListener {
             val movieSearchTitle = movieSearchText.text?.toString()
             if (movieSearchTitle != null)
             {
                 val retrofit = Retrofit.Builder().baseUrl(BASE_URL).addConverterFactory(GsonConverterFactory.create()).build()
                 val apiInterface = retrofit.create(OMDbApi::class.java)
+                // send request to OMDB based on the user-inputted title
                 apiInterface.getMovie(movieSearchTitle).enqueue(object :
                     Callback<MovieSearchResult> {
                         override fun onResponse(call: Call<MovieSearchResult>, response: Response<MovieSearchResult>) {
@@ -72,17 +75,7 @@ class MainActivity : AppCompatActivity() {
 
     fun SetupMovieContainer(searchResult: MovieSearchResult, movieContainer: ActivityMainBinding)
     {
-        /*
-        @SerializedName("Title") val title: String,
-    @SerializedName("Year") val year: Int,
-    @SerializedName("Rated") val rated: String,
-    @SerializedName("Runtime") val runtime: String,
-    @SerializedName("Genre") val genre: String,
-    @SerializedName("Poster") val posterURL: String,
-    @SerializedName("imdbRating") val imdbRating: String,
-    @SerializedName("imdbID") val imdbID: String,
-         */
-
+        // populate the movie container with results from our search
 
         val movieTitleText = movieContainer.movieTitle
         movieTitleText.setText(searchResult.title)
@@ -99,6 +92,7 @@ class MainActivity : AppCompatActivity() {
         val movieGenreText = movieContainer.genre
         movieGenreText.setText(searchResult.genre)
 
+        // load image in from glide into our imageview
         val movieImageView = movieContainer.movieImage
         Glide.with(applicationContext).load(searchResult.posterURL)
             .apply(
@@ -115,22 +109,25 @@ class MainActivity : AppCompatActivity() {
         val imdbLinkStr: String = getImdbURL(searchResult.imdbID)
         movieImdbLink.setText(imdbLinkStr)
 
+        // launch intent when user clicks share button
         movieContainer.bShare.setOnClickListener {
-            val sendIntent = Intent()
-            sendIntent.action = Intent.ACTION_SEND
+            val sendIntent = Intent(Intent.ACTION_SEND)
             sendIntent.putExtra(Intent.EXTRA_TEXT, imdbLinkStr)
             sendIntent.type = "text/plain"
-            startActivity(sendIntent)
+            val shareIntent = Intent.createChooser(sendIntent, null)
+            startActivity(shareIntent)
         }
     }
 
     fun getImdbURL(imdbID: String) : String
     {
+        // imdb link to a specific movie id
         return "https://www.imdb.com/title/$imdbID"
     }
 
     fun sendFeedbackEmail()
     {
+        // send email intent with dev email and feedback subject
         val emailRecipient = "grayclar@iu.edu"
         val emailSubject = "Feedback"
         val emailIntent = Intent(Intent.ACTION_SEND)

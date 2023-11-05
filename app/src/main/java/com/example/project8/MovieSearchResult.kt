@@ -3,7 +3,7 @@ package com.example.project8
 import com.google.gson.annotations.SerializedName
 
 data class MovieSearchResult (
-
+    // each aspect of the OMDB json response that we need
     @SerializedName("Title") val title: String,
     @SerializedName("Year") val year: Int,
     @SerializedName("Rated") val rated: String,
